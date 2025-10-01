@@ -57,8 +57,7 @@ def open_and_convert(uploaded_file):
 st.set_page_config(
     page_title="🎨 AI Object Extractor",
     layout="wide",
-    initial_sidebar_state="expanded",
-    menu_items={'Get Help': None, 'Report a bug': None, 'About': None}
+    initial_sidebar_state="expanded"
 )
 
 # ------------------ Sidebar ------------------
@@ -85,25 +84,18 @@ st.sidebar.markdown("""
 # ------------------ Custom CSS ------------------
 st.markdown(f"""
 <style>
-/* Full dashboard background */
 [data-testid="stAppViewContainer"] {{
     background-color: {bg_color};
 }}
-
-/* Remove top padding */
 .css-18e3th9 {{
     padding-top: 0rem;
     padding-bottom: 1rem;
 }}
-
-/* Sidebar gradient */
 .css-1d391kg {{
     background: linear-gradient(to bottom, {sidebar_start}, {sidebar_end});
     color: white;
     font-weight: bold;
 }}
-
-/* Header text styles */
 h1 {{
     text-align: center;
     color: white;
@@ -112,8 +104,6 @@ h1 {{
 h2, h3 {{
     color: #4B0082;
 }}
-
-/* Buttons */
 .stButton button {{
     background-color: #FF69B4;
     color: white;
@@ -126,25 +116,25 @@ h2, h3 {{
 </style>
 """, unsafe_allow_html=True)
 
-# ------------------ Dashboard Logo ------------------
+# ------------------ Dashboard Logo (Base64 Embedded) ------------------
 try:
-    logo = Image.open("logo.png").convert("RGBA")  # Your logo file
-    size = (180, 180)  # medium-large size
+    logo = Image.open("logo.png").convert("RGBA")  # Make sure this exists in repo
+    size = (180, 180)  # medium-large
     logo = logo.resize(size)
 
-    # Rounded corners mask
+    # Rounded corners
     radius = 30
     rounded_mask = Image.new('L', size, 0)
     draw = ImageDraw.Draw(rounded_mask)
     draw.rounded_rectangle((0, 0, size[0], size[1]), radius=radius, fill=255)
     logo.putalpha(rounded_mask)
 
-    # Convert to base64 for HTML embedding
+    # Convert to Base64
     buffered = io.BytesIO()
     logo.save(buffered, format="PNG")
     img_str = base64.b64encode(buffered.getvalue()).decode()
 
-    # Display logo centered
+    # Display logo at top-center
     st.markdown(
         f"""
         <div style="text-align:center; margin-top:10px; margin-bottom:10px;">
@@ -182,7 +172,6 @@ if uploaded_files:
             original_resized = resize_image(original_image, max_width=800)
             masked_resized = resize_image(masked_image, max_width=800)
 
-            # Row 1: Original | Masked
             col1, col2 = st.columns(2)
             with col1:
                 st.subheader(f"🖼 Original: {uploaded_file.name}")
@@ -202,13 +191,10 @@ if uploaded_files:
                 zip_file.writestr(f"masked_{uploaded_file.name}.png", buf.getvalue())
 
             st.markdown("---")
-            # Row 2: Overlay Slider
             st.subheader(f"🔄 Overlay for: {uploaded_file.name}")
             opacity = st.slider(f"Overlay Opacity", 0.0, 1.0, 0.5, key=f"slider_{uploaded_file.name}")
 
-            # Ensure both images are same size for blending
             masked_resized = masked_resized.resize(original_resized.size)
-
             overlay = Image.blend(original_resized, masked_resized.convert("RGB"), alpha=opacity)
             col_left, col_center, col_right = st.columns([1, 2, 1])
             with col_center:
